@@ -87,7 +87,7 @@ from ..tools.registry import ToolRegistry
 from ..tools.structured_output._structured_output_context import StructuredOutputContext
 from ..tools.watcher import ToolWatcher
 from ..types._events import AgentResultEvent, EventLoopStopEvent, InitEventLoopEvent, ModelStreamChunkEvent, TypedEvent
-from ..types.agent import AgentInput, ConcurrentInvocationMode, Limits, LocalAgent
+from ..types.agent import LIMITS_KEYS, AgentInput, ConcurrentInvocationMode, Limits, LocalAgent
 from ..types.content import (
     ContentBlock,
     Message,
@@ -1865,16 +1865,13 @@ class Agent(AgentBase, LocalAgent):
         """
         if not limits:
             return
-        unrecognized_keys = [key for key in limits if key not in ("turns", "output_tokens", "total_tokens")]
+        unrecognized_keys = sorted(key for key in limits if key not in LIMITS_KEYS)
         if unrecognized_keys:
             raise TypeError(
-                f"limits keys {unrecognized_keys!r} are not recognized caps, "
-                "expected 'turns', 'output_tokens', or 'total_tokens'"
+                f"limits keys {unrecognized_keys} are not recognized caps, "
+                f"expected one of {', '.join(repr(key) for key in LIMITS_KEYS)}"
             )
-        for key in ("turns", "output_tokens", "total_tokens"):
-            if key not in limits:
-                continue
-            value = limits[key]
+        for key, value in limits.items():
             if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
                 raise TypeError(f"limits[{key!r}] must be a positive int, got {value!r}")
 

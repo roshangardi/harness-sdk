@@ -122,6 +122,13 @@ class Limits(TypedDict, total=False):
     total_tokens: int
 
 
+LIMITS_KEYS = tuple(Limits.__annotations__)
+"""The recognized cap names, in declaration order.
+
+Derived from ``Limits`` so validation and the type it validates against cannot drift apart.
+"""
+
+
 class ConcurrentInvocationMode(str, Enum):
     """Mode controlling concurrent invocation behavior.
 
