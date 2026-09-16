@@ -5,6 +5,7 @@ import {
   type InvokableAgent,
   type InvokeArgs,
   type InvokeOptions,
+  LIMITS_KEYS,
   type LocalAgent,
   type localAgentSymbol,
 } from '../types/agent.js'
@@ -881,23 +882,23 @@ export class Agent implements LocalAgent, InvokableAgent {
    */
   private _validateLimits(options: InvokeOptions | undefined): void {
     if (!options?.limits) return
-    const unrecognizedKeys = Object.keys(options.limits).filter(
-      (key) => key !== 'turns' && key !== 'outputTokens' && key !== 'totalTokens'
-    )
+    const { limits } = options
+    const recognizedKeys = new Set<string>(LIMITS_KEYS)
+    const unrecognizedKeys = Object.keys(limits)
+      .filter((key) => !recognizedKeys.has(key))
+      .sort()
     if (unrecognizedKeys.length > 0) {
       throw new TypeError(
         `limits keys [${unrecognizedKeys.join(', ')}] are not recognized caps, ` +
-          `expected 'turns', 'outputTokens', or 'totalTokens'`
+          `expected one of ${LIMITS_KEYS.map((key) => `'${key}'`).join(', ')}`
       )
     }
-    const assertPositive = (name: string, value: number | undefined): void => {
+    for (const key of LIMITS_KEYS) {
+      const value = limits[key]
       if (value !== undefined && (!Number.isFinite(value) || value <= 0)) {
-        throw new TypeError(`${name} must be a positive finite number, got ${value}`)
+        throw new TypeError(`limits.${key} must be a positive finite number, got ${value}`)
       }
     }
-    assertPositive('limits.turns', options.limits.turns)
-    assertPositive('limits.outputTokens', options.limits.outputTokens)
-    assertPositive('limits.totalTokens', options.limits.totalTokens)
   }
 
   /**
