@@ -87,7 +87,7 @@ from ..tools.registry import ToolRegistry
 from ..tools.structured_output._structured_output_context import StructuredOutputContext
 from ..tools.watcher import ToolWatcher
 from ..types._events import AgentResultEvent, EventLoopStopEvent, InitEventLoopEvent, ModelStreamChunkEvent, TypedEvent
-from ..types.agent import LIMITS_KEYS, AgentInput, ConcurrentInvocationMode, Limits, LocalAgent
+from ..types.agent import _LIMITS_KEYS, AgentInput, ConcurrentInvocationMode, Limits, LocalAgent
 from ..types.content import (
     ContentBlock,
     Message,
@@ -1865,11 +1865,11 @@ class Agent(AgentBase, LocalAgent):
         """
         if not limits:
             return
-        unrecognized_keys = sorted(key for key in limits if key not in LIMITS_KEYS)
+        unrecognized_keys = sorted(key for key in limits if key not in _LIMITS_KEYS)
         if unrecognized_keys:
             raise TypeError(
                 f"limits keys {unrecognized_keys} are not recognized caps, "
-                f"expected one of {', '.join(repr(key) for key in LIMITS_KEYS)}"
+                f"expected one of {', '.join(repr(key) for key in _LIMITS_KEYS)}"
             )
         for key, value in limits.items():
             if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
